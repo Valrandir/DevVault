@@ -9,8 +9,13 @@ typedef unsigned int uint;
 
 void fail()
 {
-	auto text = TEXT("Fail");
-	MessageBox(0, text, text, MB_OK);
+	DWORD last_error = GetLastError();
+
+	DWORD const buffer_size = 0x200;
+	TCHAR buffer[buffer_size];
+	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, last_error, 0, buffer, buffer_size, NULL);
+
+	MessageBox(0, buffer, TEXT("Fail"), MB_OK);
 	ExitProcess(1);
 }
 
@@ -39,15 +44,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	result = ReadFile(hFile, &ruff_wave, bytes_to_read, &bytes_read, NULL);
 	if(!result && bytes_read != bytes_to_read) fail();
 
-	if(ruff_wave.chunk_id != 0x52494646 /*RIFF*/) fail();
-	if(ruff_wave.format != 0x57415645 /*WAVE*/) fail();
-	if(ruff_wave.chunk_fmt_id != 0x666d7420 /*fmt*/) fail();
+	//if(ruff_wave.chunk_id != 0x52494646 /*RIFF*/) fail();
+	//if(ruff_wave.format != 0x57415645 /*WAVE*/) fail();
+	//if(ruff_wave.chunk_fmt_id != 0x666d7420 /*fmt*/) fail();
 
 	ruff_wave.data = malloc(ruff_wave.chunk_data_size);
 	if(ruff_wave.data == 0) fail();
 
 	bytes_to_read = ruff_wave.chunk_data_size;
-	result = ReadFile(hFile, &ruff_wave.data, bytes_to_read, &bytes_read, NULL);
+	result = ReadFile(hFile, ruff_wave.data, bytes_to_read, &bytes_read, NULL);
 	if(!result && bytes_read != bytes_to_read) fail();
 
 	CloseHandle(hFile);
@@ -57,8 +62,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	wave_format.wFormatTag = ruff_wave.audio_format;
 	wave_format.nChannels = ruff_wave.num_channel;
 	wave_format.nSamplesPerSec = ruff_wave.sample_rate;
+	wave_format.nAvgBytesPerSec = ruff_wave.block_align * ruff_wave.sample_rate;
 	wave_format.nBlockAlign = ruff_wave.block_align;
-	wave_format.nAvgBytesPerSec = wave_format.nBlockAlign * wave_format.nSamplesPerSec;
+	wave_format.wBitsPerSample = ruff_wave.bits_per_sample;
 
 	//Init DirectSound
 	IDirectSound8* lpDirectSound = NULL;
