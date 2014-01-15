@@ -44,9 +44,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	result = ReadFile(hFile, &ruff_wave, bytes_to_read, &bytes_read, NULL);
 	if(!result && bytes_read != bytes_to_read) fail();
 
-	//if(ruff_wave.chunk_id != 0x52494646 /*RIFF*/) fail();
-	//if(ruff_wave.format != 0x57415645 /*WAVE*/) fail();
-	//if(ruff_wave.chunk_fmt_id != 0x666d7420 /*fmt*/) fail();
+	if(ruff_wave.chunk_id != 0x46464952 /*RIFF*/) fail();
+	if(ruff_wave.format != 0x45564157 /*WAVE*/) fail();
+	if(ruff_wave.chunk_fmt_id != 0x20746d66 /*fmt*/) fail();
+	if(ruff_wave.chunk_data_id != 0x61746164 /*data*/) fail();
 
 	ruff_wave.data = malloc(ruff_wave.chunk_data_size);
 	if(ruff_wave.data == 0) fail();
@@ -95,6 +96,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	if(hResult != DS_OK) fail();
 
 	//Play
+	lpDirectSoundBuffer->SetCurrentPosition(0);
 	hResult = lpDirectSoundBuffer->Play(NULL, 0, 0);
 	if(hResult != DS_OK) fail();
 
