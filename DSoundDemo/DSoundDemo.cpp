@@ -23,14 +23,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch(msg)
 	{
+		case WM_KEYDOWN:
+			if(wParam == 27)
+			{
+				PostQuitMessage(0);
+				return 0;
+			}
+			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
-			break;
-		default:
-			return DefWindowProc(hWnd, msg, wParam, lParam);
+			return 0;
 	}
 
-	return 0;
+	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 HWND InitWindow(HINSTANCE hInstance)
@@ -44,7 +49,7 @@ HWND InitWindow(HINSTANCE hInstance)
 	wc.lpfnWndProc = WndProc;
 	wc.lpszClassName = TEXT("RUFF_WAVE");
 	RegisterClassEx(&wc);
-	return CreateWindowEx(0, wc.lpszClassName, wc.lpszClassName, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, HWND_DESKTOP, NULL, hInstance, NULL);
+	return CreateWindowEx(0, wc.lpszClassName, wc.lpszClassName, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, HWND_DESKTOP, NULL, hInstance, NULL);
 }
 
 void LoopWindow()
@@ -82,7 +87,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	DWORD bytes_to_read = sizeof(ruff_wave) - sizeof(void*);
 	DWORD bytes_read;
 	result = ReadFile(hFile, &ruff_wave, bytes_to_read, &bytes_read, NULL);
-	if(!result && bytes_read != bytes_to_read) fail();
+	if(!result || bytes_read != bytes_to_read) fail();
 
 	if(ruff_wave.chunk_id != 0x46464952 /*RIFF*/) fail();
 	if(ruff_wave.format != 0x45564157 /*WAVE*/) fail();
@@ -94,7 +99,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 
 	bytes_to_read = ruff_wave.chunk_data_size;
 	result = ReadFile(hFile, ruff_wave.data, bytes_to_read, &bytes_read, NULL);
-	if(!result && bytes_read != bytes_to_read) fail();
+	if(!result || bytes_read != bytes_to_read) fail();
 
 	CloseHandle(hFile);
 	hFile = NULL;
