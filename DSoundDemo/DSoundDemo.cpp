@@ -3,7 +3,7 @@
 #include <mmsystem.h>
 #include <dsound.h>
 
-#define WAVE_FILE_PATH TEXT("C:\\Users\\Valrandir\\Desktop\\OneFile\\Alarm05.wav")
+#define WAVE_FILE_PATH TEXT("Alarm05.wav")
 typedef unsigned short ushort;
 typedef unsigned int uint;
 
