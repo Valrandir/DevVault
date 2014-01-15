@@ -19,10 +19,50 @@ void fail()
 	ExitProcess(1);
 }
 
+LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hWnd, msg, wParam, lParam);
+	}
+
+	return 0;
+}
+
+HWND InitWindow(HINSTANCE hInstance)
+{
+	WNDCLASSEX wc = {0};
+	wc.cbSize = sizeof(wc);
+	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wc.hInstance = hInstance;
+	wc.lpfnWndProc = WndProc;
+	wc.lpszClassName = TEXT("RUFF_WAVE");
+	RegisterClassEx(&wc);
+	return CreateWindowEx(0, wc.lpszClassName, wc.lpszClassName, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, HWND_DESKTOP, NULL, hInstance, NULL);
+}
+
+void LoopWindow()
+{
+	MSG msg;
+
+	while(GetMessage(&msg, 0, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	HRESULT hResult;
 	BOOL result;
+	HWND hWnd;
 
 	//Load Wave File
 	struct RuffWaveType
@@ -67,12 +107,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	wave_format.nBlockAlign = ruff_wave.block_align;
 	wave_format.wBitsPerSample = ruff_wave.bits_per_sample;
 
+	//Create Window
+	hWnd = InitWindow(hInstance);
+
 	//Init DirectSound
 	IDirectSound8* lpDirectSound = NULL;
 	hResult = DirectSoundCreate8(NULL, &lpDirectSound, NULL);
 	if(hResult != DS_OK) fail();
 
-	hResult = lpDirectSound->SetCooperativeLevel(GetDesktopWindow(), DSSCL_NORMAL);
+	hResult = lpDirectSound->SetCooperativeLevel(hWnd, DSSCL_NORMAL);
 	if(hResult != DS_OK) fail();
 
 	DSBUFFERDESC ds_buffer_desc = {0};
@@ -96,12 +139,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	if(hResult != DS_OK) fail();
 
 	//Play
-	lpDirectSoundBuffer->SetCurrentPosition(0);
 	hResult = lpDirectSoundBuffer->Play(NULL, 0, 0);
 	if(hResult != DS_OK) fail();
 
 	//Wait
-	Sleep(12000);
+	LoopWindow();
 
 	//Free
 	lpDirectSoundBuffer->Release();
