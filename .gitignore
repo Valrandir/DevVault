@@ -1,4 +1,8 @@
-*/Debug/*
-*.tags
-*.session
-
+.vs/
+Debug/
+Release/
+x64/
+*.opensdf
+*.sdf
+*.suo
+*.user
