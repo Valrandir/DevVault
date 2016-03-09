@@ -576,8 +576,8 @@ void scene_present()
 
 INT WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR params, INT param_count)
 {
-	init_window_class();
 	init_gl_extensions();
+	init_window_class();
 	init_gl_window();
 
 	shaders_init();
@@ -619,9 +619,10 @@ int read_file(const char* filename, void** out_buffer, size_t* out_size)
 	if(hFile == INVALID_HANDLE_VALUE)
 		return 1;
 
+	DWORD bytes_read;
 	*out_size = (size_t)GetFileSize(hFile, 0);
 	*out_buffer = malloc(*out_size);
-	ReadFile(hFile, *out_buffer, *out_size, 0, 0);
+	ReadFile(hFile, *out_buffer, *out_size, &bytes_read, 0);
 	CloseHandle(hFile);
 
 	return 0;
