@@ -349,16 +349,21 @@ GLuint create_shader(GLenum type, const char* shader_code)
 	glShaderSource(shader_id, 1, &shader_code, NULL);
 	glCompileShader(shader_id);
 
-	GLint info_log_length;
-	glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
-	if(info_log_length > 1)
+	GLint success;
+	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &success);
+	if(!success)
 	{
-		GLsizei length;
-		GLchar* buffer = (GLchar*)malloc(info_log_length);
-		glGetShaderInfoLog(shader_id, info_log_length, &length, buffer);
-		MessageBoxA(_hwnd, buffer, "Shader info log", MB_OK | MB_ICONEXCLAMATION);
-		free(buffer);
-		exit(1);
+		GLint info_log_length;
+		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
+		if(info_log_length > 1)
+		{
+			GLsizei length;
+			GLchar* buffer = (GLchar*)malloc(info_log_length);
+			glGetShaderInfoLog(shader_id, info_log_length, &length, buffer);
+			MessageBoxA(_hwnd, buffer, "Shader info log", MB_OK | MB_ICONEXCLAMATION);
+			free(buffer);
+			exit(1);
+		}
 	}
 
 	return shader_id;
@@ -380,17 +385,22 @@ GLuint create_program(const GLuint* vec_shader_id, int count)
 		glAttachShader(program_id, *it++);
 
 	glLinkProgram(program_id);
-	
-	GLint info_log_length;
-	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_log_length);
-	if(info_log_length > 1)
+
+	GLint success;
+	glGetProgramiv(program_id, GL_LINK_STATUS, &success);
+	if(!success)
 	{
-		GLsizei length;
-		GLchar* buffer = (GLchar*)malloc(info_log_length);
-		glGetProgramInfoLog(program_id, info_log_length, &length, buffer);
-		MessageBoxA(_hwnd, buffer, "Program info log", MB_OK | MB_ICONEXCLAMATION);
-		free(buffer);
-		exit(1);
+		GLint info_log_length;
+		glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_log_length);
+		if(info_log_length > 1)
+		{
+			GLsizei length;
+			GLchar* buffer = (GLchar*)malloc(info_log_length);
+			glGetProgramInfoLog(program_id, info_log_length, &length, buffer);
+			MessageBoxA(_hwnd, buffer, "Program info log", MB_OK | MB_ICONEXCLAMATION);
+			free(buffer);
+			exit(1);
+		}
 	}
 
 	it = vec_shader_id;
