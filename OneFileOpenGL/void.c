@@ -686,8 +686,8 @@ unsigned char* get_texture_from_png_file(int* width, int* height)
 
 	unsigned char* rgba_data = (unsigned char*)malloc(bytes);
 	unsigned char* it = rgba_data;
-	for(unsigned int y = 0; y < *height; ++y)
-		for(unsigned int x = 0; x < rowbytes; ++x)
+	for(int y = 0; y < *height; ++y)
+		for(png_size_t x = 0; x < rowbytes; ++x)
 			*(it++) = *(row_pointers[y] + x);
 
 	png_destroy_read_struct(&png_ptr, &info_ptr, 0);
